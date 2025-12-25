@@ -1,0 +1,7 @@
+{
+  "name": "Visit.Ethiopiayen",
+  "description": "A professional, community-driven tourism platform for Ethiopia featuring real-time data, business modules, and comprehensive travel guides.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
