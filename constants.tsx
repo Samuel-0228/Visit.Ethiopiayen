@@ -64,7 +64,7 @@ export const DESTINATIONS: Destination[] = [
     significance: 'Known for the Fasil Ghebbi, a fortress enclosure containing several majestic palaces.',
     bestTime: 'October to February.',
     costEstimate: '$85 - $220 per day',
-    mainImage: 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Gondar_Ethiopia.jpg?referrer=grok.com',
+    mainImage: 'https://th.bing.com/th/id/R.c9e2dce2f94a8038bfaf47aaccc19a43?rik=GdEBSHho7U3vGw&pid=ImgRaw&r=0',
     gallery: [],
     attractions: ['Fasil Ghebbi (Royal Enclosure)', 'Debre Berhan Selassie Church', 'Fasilides Bath'],
     tips: ['Visit during Timkat (January) for an incredible cultural experience', 'Take a day trip to the Simien Mountains from here']
