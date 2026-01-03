@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { DESTINATIONS } from '../constants';
 import { UserProfile } from '../types';
 import { getTravelAdvisorResponse } from '../geminiService';
+import { supabase } from '../supabaseClient';
 
 const DestinationDetail: React.FC<{ user: UserProfile | null }> = ({ user }) => {
   const { id } = useParams<{ id: string }>();
@@ -11,6 +12,80 @@ const DestinationDetail: React.FC<{ user: UserProfile | null }> = ({ user }) => 
   const [query, setQuery] = useState('');
   const [advisorResponse, setAdvisorResponse] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  // Community Image State
+  const [communityImages, setCommunityImages] = useState<any[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      fetchCommunityImages();
+    }
+  }, [id]);
+
+  const fetchCommunityImages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('community_images')
+        .select('*')
+        .eq('destinationId', id)
+        .eq('status', 'approved');
+      
+      if (error) throw error;
+      if (data) setCommunityImages(data);
+    } catch (err) {
+      console.error('Error fetching images:', err);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !id) return;
+
+    setUploading(true);
+    try {
+      // 1. Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${id}/${Math.random()}.${fileExt}`;
+      const filePath = `community-uploads/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // 2. Get Public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('images')
+        .getPublicUrl(filePath);
+
+      const publicUrl = publicUrlData.publicUrl;
+
+      // 3. Insert into community_images table
+      const { error: insertError } = await supabase
+        .from('community_images')
+        .insert([
+          {
+            destinationId: id,
+            url: publicUrl,
+            author: user?.name || 'Anonymous',
+            title: 'New Community Photo',
+            status: 'approved', // Auto-approve for demo purposes
+          },
+        ]);
+
+      if (insertError) throw insertError;
+
+      alert('Image uploaded successfully!');
+      fetchCommunityImages();
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Upload failed. Please ensure Supabase URL and Key are configured.');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   if (!dest) {
     return (
@@ -61,15 +136,33 @@ const DestinationDetail: React.FC<{ user: UserProfile | null }> = ({ user }) => 
           <section>
             <h2 className="text-2xl font-bold mb-6">Gallery</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {dest.gallery.map((img, idx) => (
-                <div key={idx} className="aspect-square rounded-xl overflow-hidden shadow-md">
-                  <img src={img} className="w-full h-full object-cover" alt={`Gallery ${idx}`} />
+              {/* Only show homepage-visible image if gallery is empty */}
+              <div className="aspect-square rounded-xl overflow-hidden shadow-md">
+                <img src={dest.mainImage} className="w-full h-full object-cover" alt={`${dest.name} main`} />
+              </div>
+              
+              {/* Community Images from Supabase */}
+              {communityImages.map((img, idx) => (
+                <div key={idx} className="aspect-square rounded-xl overflow-hidden shadow-md group relative">
+                  <img src={img.url} className="w-full h-full object-cover" alt={`Community ${idx}`} />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+                    <p className="text-white text-xs text-center">By {img.author}</p>
+                  </div>
                 </div>
               ))}
-              <div className="aspect-square bg-slate-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center p-4 text-center cursor-pointer hover:bg-slate-100 transition-all">
-                <i className="fas fa-plus text-gray-400 mb-2"></i>
-                <span className="text-xs font-bold text-gray-500 uppercase">Add Community Photo</span>
-              </div>
+
+              {/* Upload Placeholder */}
+              <label className="aspect-square bg-slate-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center p-4 text-center cursor-pointer hover:bg-slate-100 transition-all">
+                {uploading ? (
+                  <i className="fas fa-circle-notch fa-spin text-ethiopia-green text-2xl"></i>
+                ) : (
+                  <>
+                    <i className="fas fa-camera text-gray-400 mb-2 text-2xl"></i>
+                    <span className="text-xs font-bold text-gray-500 uppercase">Upload Community Photo</span>
+                  </>
+                )}
+                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+              </label>
             </div>
           </section>
 

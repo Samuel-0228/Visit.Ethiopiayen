@@ -13,11 +13,7 @@ export const DESTINATIONS: Destination[] = [
     bestTime: 'October to March (Ethiopian Christmas in January is peak).',
     costEstimate: '$100 - $300 per day',
     mainImage: 'https://th.bing.com/th/id/R.a4082a7d1269a84da32c2b17d58bf5b0?rik=I2OyQY3GHO6fkw&pid=ImgRaw&r=0',
-    gallery: [
-      'https://picsum.photos/seed/l1/600/400',
-      'https://picsum.photos/seed/l2/600/400',
-      'https://picsum.photos/seed/l3/600/400'
-    ],
+    gallery: [],
     attractions: ['Bete Giyorgis', 'Bete Medhane Alem', 'Bete Maryam'],
     tips: ['Hire a local licensed guide', 'Wear comfortable walking shoes', 'Modest clothing for churches']
   },
@@ -32,10 +28,7 @@ export const DESTINATIONS: Destination[] = [
     bestTime: 'September to November (lush green views).',
     costEstimate: '$80 - $250 per day',
     mainImage: 'https://th.bing.com/th/id/R.90c0cd9ab774bf3c6fa31e94a7375e44?rik=W4Z5ZwASLCDHqA&pid=ImgRaw&r=0',
-    gallery: [
-      'https://picsum.photos/seed/s1/600/400',
-      'https://picsum.photos/seed/s2/600/400'
-    ],
+    gallery: [],
     attractions: ['Ras Dashen', 'Jinbar Waterfall', 'Chenek Camp'],
     tips: ['High altitude precautions', 'Multi-day treks are best', 'Bring warm gear for nights']
   },
