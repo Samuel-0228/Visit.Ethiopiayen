@@ -42,6 +42,12 @@ const DestinationDetail: React.FC<{ user: UserProfile | null }> = ({ user }) => 
     const file = e.target.files?.[0];
     if (!file || !id) return;
 
+    // Basic file size check for UX
+    if (file.size > 5 * 1024 * 1024) {
+      alert("This image is too large. Please select a file smaller than 5MB.");
+      return;
+    }
+
     setUploading(true);
     try {
       // 1. Upload to Supabase Storage
@@ -69,19 +75,20 @@ const DestinationDetail: React.FC<{ user: UserProfile | null }> = ({ user }) => 
           {
             destinationId: id,
             url: publicUrl,
-            author: user?.name || 'Anonymous',
-            title: 'New Community Photo',
-            status: 'approved', // Auto-approve for demo purposes
+            author: user?.name || 'Fellow Traveler',
+            title: 'Community Perspective',
+            status: 'approved',
           },
         ]);
 
       if (insertError) throw insertError;
 
-      alert('Image uploaded successfully!');
+      alert('Thank you for sharing! Your photo has been added to the gallery.');
       fetchCommunityImages();
     } catch (err) {
       console.error('Upload failed:', err);
-      alert('Upload failed. Please ensure Supabase URL and Key are configured.');
+      // User-friendly error message
+      alert('We could not process your upload at this time. Please try again later.');
     } finally {
       setUploading(false);
     }
@@ -136,12 +143,10 @@ const DestinationDetail: React.FC<{ user: UserProfile | null }> = ({ user }) => 
           <section>
             <h2 className="text-2xl font-bold mb-6">Gallery</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {/* Only show homepage-visible image if gallery is empty */}
               <div className="aspect-square rounded-xl overflow-hidden shadow-md">
                 <img src={dest.mainImage} className="w-full h-full object-cover" alt={`${dest.name} main`} />
               </div>
               
-              {/* Community Images from Supabase */}
               {communityImages.map((img, idx) => (
                 <div key={idx} className="aspect-square rounded-xl overflow-hidden shadow-md group relative">
                   <img src={img.url} className="w-full h-full object-cover" alt={`Community ${idx}`} />
@@ -151,14 +156,13 @@ const DestinationDetail: React.FC<{ user: UserProfile | null }> = ({ user }) => 
                 </div>
               ))}
 
-              {/* Upload Placeholder */}
               <label className="aspect-square bg-slate-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center p-4 text-center cursor-pointer hover:bg-slate-100 transition-all">
                 {uploading ? (
                   <i className="fas fa-circle-notch fa-spin text-ethiopia-green text-2xl"></i>
                 ) : (
                   <>
                     <i className="fas fa-camera text-gray-400 mb-2 text-2xl"></i>
-                    <span className="text-xs font-bold text-gray-500 uppercase">Upload Community Photo</span>
+                    <span className="text-xs font-bold text-gray-500 uppercase">Share Your View</span>
                   </>
                 )}
                 <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
@@ -191,7 +195,7 @@ const DestinationDetail: React.FC<{ user: UserProfile | null }> = ({ user }) => 
             </form>
 
             {advisorResponse && (
-              <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm animate-fade-in whitespace-pre-wrap text-gray-700 leading-relaxed">
+              <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm animate-fade-in whitespace-pre-wrap text-gray-700 leading-relaxed prose prose-slate max-w-none">
                 {advisorResponse}
               </div>
             )}
